@@ -1,4 +1,5 @@
 local services = require(script.Parent.Services)
+local network = require(script.Parent.Network)
 
 -- Types
 local types = require(script.Types)
@@ -19,7 +20,7 @@ local MATCHMAKER_STATUS = services.memoryStoreService:GetSortedMap(
 local matchmaker = {}
 
 function matchmaker:Start()
-
+    
 end
 
 function matchmaker:AddPlayersToQueue(players: {[number]: UnmatchedPlayer})

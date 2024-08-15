@@ -4,9 +4,11 @@ export type JSON = string
 export type PacketId = string
 export type Packet = {
     serverId: string,
-    method: string,
     content: any,
     id: PacketId,
+
+    isResponse: boolean,
+    epochTime: number,
 }
 
 return types
