@@ -4,10 +4,10 @@ serverNetwork:ListenAsync(function(packet: serverNetwork.Packet)
     if packet.content == "ping" then
        return "pong"
     end
-    return true
+    return false
 end)
 
-while task.wait(5) do
+while task.wait(1) do
     print("Sent")
 
     local tim: number = tick()
