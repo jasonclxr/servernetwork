@@ -18,6 +18,10 @@ local MATCHMAKER_STATUS = services.memoryStoreService:GetSortedMap(
 
 local matchmaker = {}
 
+function matchmaker:Start()
+
+end
+
 function matchmaker:AddPlayersToQueue(players: {[number]: UnmatchedPlayer})
     for _, player: UnmatchedPlayer in players do
         local setStatus, result = pcall(function()
