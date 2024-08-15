@@ -1,17 +1,18 @@
 local serverNetwork = require(game.ReplicatedStorage.Shared.ServerNetwork)
 
-serverNetwork:ListenAsync(function(packet)
-    print(packet.content)
+serverNetwork:ListenAsync(function(packet: serverNetwork.Packet)
     if packet.content == "ping" then
-        return "pong"
+       return "pong"
     end
+    return true
 end)
 
 while task.wait(5) do
-    local tim = tick()
-    print("Sent ping")
+    print("Sent")
+
+    local tim: number = tick()
     local success: boolean, packet: serverNetwork.Packet = serverNetwork:SendAsync(game.JobId, "ping"):await()
     if success then
-        print("Received pong", packet.epochTime - tim)
+        print("Received", packet.content, packet.epochTime - tim)
     end
 end

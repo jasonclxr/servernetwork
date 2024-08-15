@@ -15,20 +15,23 @@ local _listener = Signal.new()
 
 -- Functions
 function network:SendAsync(serverId: string, content: any): Promise<Packet>
-    return self:_sendAsync(serverId, content, false)
-end
-
-function network:_sendAsync(serverId: string, content: any, response: boolean?)
     local packet: Packet = {
         serverId = game.JobId,
         content = content,
-        isResponse = response or false,
+        isResponse = false,
         id = HttpService:GenerateGUID(false),
         epochTime = tick()
     }
     _activeRequests[packet.id] = false
 
+    return self:_sendAsync(serverId, packet)
+end
+
+function network:_sendAsync(serverId: string, packet: Packet): Promise<Packet>
     return Promise.new(function(resolve, reject, onCancel) : (boolean, any) -> ()
+        if not packet.content then
+            return reject("Content is required")
+        end
         local success: boolean, result: string = pcall(function()
             MessagingService:PublishAsync(`net {serverId}`, HttpService:JSONEncode(packet))
         end)
@@ -60,19 +63,28 @@ end
 
 function network:ListenAsync(callback: (packet: Packet) -> ())
     return _listener:Connect(function(packet: Packet)
-        return self:_sendAsync(packet.serverId, callback(packet), true)
+        local responsePacket: Packet = {
+            serverId = game.JobId,
+            id = packet.id,
+            epochTime = tick(),
+            isResponse = true,
+            content = callback(packet)
+        }
+        return pcall(function()
+            MessagingService:PublishAsync(`net {packet.serverId}`, HttpService:JSONEncode(responsePacket))
+        end)
     end)
 end
 
 -- Events
-MessagingService:SubscribeAsync(`net {game.JobId}`, function(message: JSON)
+MessagingService:SubscribeAsync(`net {game.JobId}`, function(message: any)
     local success: boolean, packet: Packet | string = pcall(function()
         return HttpService:JSONDecode(message.Data)
     end)
     if not success then return warn(packet) end
 
     -- Response from another server
-    if _activeRequests[packet.id] == false then
+    if _activeRequests[packet.id] == false and packet.isResponse then
         _activeRequests[packet.id] = packet
         return
     end
