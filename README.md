@@ -1,1 +1,1 @@
-# matchmaking
+# Server-to-Server communication
